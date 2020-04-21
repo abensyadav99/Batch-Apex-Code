@@ -1,0 +1,42 @@
+//Main Class=========
+
+
+global class LeadProcessor implements Database.Batchable<Sobject>{
+    global integer count = 0;
+    global Database.QueryLocator start(Database.BatchableContext bc){
+        return Database.getQueryLocator('Select LeadSource,Rating from Lead');
+    }
+    global void execute(Database.BatchableContext bc,List<Lead> l_lst){
+        for(Lead l : l_lst){
+            if(l.leadsource=='web'){
+                l.rating='Hot';
+                l.Country='US';
+            }
+        }
+        update l_lst;
+    }
+    global void finish(Database.BatchableContext bc){
+        System.debug('count = ' + count);
+    }
+}
+
+
+//Test Class=============
+
+@isTest
+public class LeadProcessorTest {
+    static testMethod void testme(){
+        Lead l = new Lead();
+        l.FirstName='Abhishek';
+        l.LastName='Yadav';
+        l.Company='ab';
+        l.leadsource='Web';
+        l.Country= 'USA';
+        insert l;
+        Test.startTest();
+        LeadProcessor lp= new LeadProcessor();
+        Id batchid= Database.executeBatch(lp);
+        Test.stopTest();
+        
+    }
+}
